@@ -1,9 +1,11 @@
+#![allow(dead_code)]
+
 use std::fs::File;
 use std::io::Read;
 use regex::Regex;
 
 fn main() {
-    println!("{}", day_one(true))
+    println!("{}", day_two())
 }
 
 fn read_input(path: &str) -> String {
@@ -41,4 +43,44 @@ fn day_one(is_part_two: bool) -> String {
     }
 
     numbers.iter().sum::<i32>().to_string()
+}
+
+fn day_two() -> String {
+    let input = read_input("in/2-1.txt");
+    let lines = input.split("\n").collect::<Vec<&str>>();
+    let games = lines.iter().map(|l| {
+        let l = l.split(": ").collect::<Vec<&str>>();
+        (l[0].replace("Game ", "").parse().unwrap(), l[1])
+    }).collect::<Vec<(i32, &str)>>();
+    let re = Regex::new(r"[0-9]+ [a-z]+").unwrap();
+
+    let mut possible_games: Vec<i32> = vec![];
+    for i in 0..games.len() {
+        let draws: Vec<Vec<String>> = re.captures_iter(games[i].1).map(|c| {
+            let c = c[0].to_string();
+            let arr = c.split(" ").map(|s| s.to_string()).collect();
+            arr
+        }).collect();
+        let mut possible = true;
+        for draw in draws {
+            match &*draw[1] {
+                "red" => if draw[0].parse::<i32>().unwrap() > 12 {
+                    possible = false;
+                    break;
+                }
+                "green" => if draw[0].parse::<i32>().unwrap() > 13 {
+                    possible = false;
+                    break;
+                }
+            "blue" => if draw[0].parse::<i32>().unwrap() > 14 {
+                    possible = false;
+                    break;
+                }
+                _ => ()
+            }
+        }
+        if possible { possible_games.push((i + 1) as i32) }
+    }
+
+    possible_games.iter().sum::<i32>().to_string()
 }
