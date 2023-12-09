@@ -12,13 +12,14 @@ pub mod prelude {
 }
 
 mod days {
+    pub mod day_four;
     pub mod day_one;
     pub mod day_three;
     pub mod day_two;
 }
 
 fn main() {
-    println!("{}", day_three::day_three(true))
+    println!("{}", day_four::day_four(false))
 }
 
 pub fn read_input(path: &str) -> String {
