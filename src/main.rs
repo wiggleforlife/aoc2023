@@ -19,7 +19,7 @@ mod days {
 }
 
 fn main() {
-    println!("{}", day_four::day_four(false))
+    println!("{}", day_four::day_four(true))
 }
 
 pub fn read_input(path: &str) -> String {

@@ -1,36 +1,70 @@
 use crate::prelude::*;
 
+#[derive(Clone, Debug)]
 struct Card {
     winning: Vec<u8>,
     scratched: Vec<u8>,
     points: u32,
+    matches: usize,
+}
+
+impl Card {
+    fn new(winning: Vec<u8>, scratched: Vec<u8>) -> Self {
+        let (mut points, mut matches) = (0, 0);
+
+        for num in scratched.clone() {
+            if !winning.contains(&num) {
+                continue;
+            }
+
+            matches += 1;
+            if points == 0 {
+                points += 1;
+            } else {
+                points *= 2;
+            }
+        }
+
+        Card { winning, scratched, points, matches }
+    }
+
+    fn matched_cards(self, i: usize) -> Vec<usize> {
+        (i + 1..i + 1 + self.matches).collect()
+    }
 }
 
 pub fn day_four(is_part_two: bool) -> String {
     let input = read_input("in/4-1.txt");
     let lines = input.split("\n").map(|s| s.to_string()).collect::<Vec<_>>();
-    let cards = split_cards(lines);
-    let mut sum = 0u32;
+    let cards = get_cards(lines);
+    let mut won_cards: Vec<usize> = (0..cards.len()).collect();
+    let mut points = 0u32;
 
-    for mut card in cards {
-        for num in card.scratched {
-            if !card.winning.contains(&num) {
-                continue;
-            }
-            if card.points == 0 {
-                card.points += 1;
-            } else {
-                card.points *= 2;
-            }
+    let mut i = 0;
+    while i < won_cards.len() - 1 {
+        let card_index = won_cards[i];
+        let card = cards[won_cards[card_index]].clone();
+
+        if !is_part_two {
+            points += card.points;
+            i += 1;
+            continue;
         }
 
-        sum += card.points;
+        let mut won = card.clone().matched_cards(card_index);
+        won_cards.append(&mut won);
+
+        i += 1;
     }
 
-    sum.to_string()
+    return if is_part_two {
+        won_cards.len().to_string()
+    } else {
+        points.to_string()
+    };
 }
 
-fn split_cards(lines: Vec<String>) -> Vec<Card> {
+fn get_cards(lines: Vec<String>) -> Vec<Card> {
     let mut cards: Vec<Card> = vec![];
     for mut line in lines {
         line = line.split(": ").last().unwrap().to_string();
@@ -51,7 +85,7 @@ fn split_cards(lines: Vec<String>) -> Vec<Card> {
             })
             .collect();
 
-        cards.push(Card { winning, scratched, points: 0 });
+        cards.push(Card::new(winning, scratched));
     }
 
     cards
